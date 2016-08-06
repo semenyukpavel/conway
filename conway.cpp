@@ -1,19 +1,22 @@
 #include <stdio.h>
 
+#define W 8
+#define L 8
+
 struct Cell {
     bool alive;
 };
 
 struct Board {
-    Cell boardContents[64];
+    Cell boardContents[W*L];
     bool existsLife;
 };
 
 void initializeEmptyBoard(Board &gameBoard) {
     int i,j;
-    for (i=0; i<8; i++) {
-        for (j=0; j<8; j++) {
-            gameBoard.boardContents[8*i+j].alive = false;
+    for (i=0; i<L; i++) {
+        for (j=0; j<W; j++) {
+            gameBoard.boardContents[W*i+j].alive = false;
         }
     }
     gameBoard.existsLife = false;
@@ -22,13 +25,14 @@ void initializeEmptyBoard(Board &gameBoard) {
 void greeting() {
     printf("Hello! This is a simple Conway's Game of Life simulator!\n");
     printf("The rules are simple:\n");
-    printf("The board is 8x8, but the edges are stuck together, so actually you play on a torus.\n");
+    printf("The board is WxL, but the edges are stuck together, so actually you play on a torus.\n");
+    printf("W is equal to 8 and L is equal to 8.\n");
     printf("Each cell has 8 neighbors: 2 horizontal, 2 vertical and 4 diagonal.\n");
     printf("Each cell is either alive or dead. On each step the board updates according to the following rules:\n");
     printf("(note that the rules depend on the information you enter after this introduction)\n");
     printf("1. If a dead cell has N alive neighbors, it becomes alive.\n");
-    printf("2. If an alive cell has less than M or more than L alive neighbors, it dies, otherwise it stays alive.\n");
-    printf("Now you have to provide N,M and L.\n");
+    printf("2. If an alive cell has less than M or more than T alive neighbors, it dies, otherwise it stays alive.\n");
+    printf("Now you have to provide N,M and T.\n");
 }
 
 int getDeadToAliveThreshold() {
@@ -56,15 +60,15 @@ start:
 }
 
 int getAliveToDeadMaximum() {
-    int L;
-    printf("Enter L (Conway's canonical L = 3):\n");
+    int T;
+    printf("Enter T (Conway's canonical T = 3):\n");
 start:
-    scanf("%d", &L);
-    if ((L<0)||(L>8)) {
-        printf("L has to be between 0 and 8. Enter L (Conway's canonical L = 3):\n");
+    scanf("%d", &T);
+    if ((T<0)||(T>8)) {
+        printf("T has to be between 0 and 8. Enter T (Conway's canonical T = 3):\n");
         goto start;
     }
-    return L;
+    return T;
 }
 
 void introBoard() {
@@ -77,8 +81,8 @@ void getBoard(Board &gameBoard) {
     int i,j;
     int cell;
     printf("Enter starting board:\n");
-    for (i=0; i<8; i++) {
-        for (j=0; j<8; j++) {
+    for (i=0; i<L; i++) {
+        for (j=0; j<W; j++) {
         start:
             scanf("%d", &cell);
             if ((cell<0)||(cell>1)) {
@@ -86,7 +90,7 @@ void getBoard(Board &gameBoard) {
                 goto start;
             }
             if(cell == 1){
-                gameBoard.boardContents[8*i+j].alive = true;
+                gameBoard.boardContents[W*i+j].alive = true;
                 gameBoard.existsLife = true;
             }
         }
@@ -103,9 +107,9 @@ void finalIntro() {
 
 void showBoard(Board gameBoard) {
     int i,j;
-    for (i=0; i<8; i++) {
-        for (j=0; j<8; j++) {
-            if (gameBoard.boardContents[8*i+j].alive) {
+    for (i=0; i<L; i++) {
+        for (j=0; j<W; j++) {
+            if (gameBoard.boardContents[W*i+j].alive) {
                 printf("1 ");
             }
             else {
@@ -127,128 +131,128 @@ int searchNeighbors(Cell neighbors[]){
     return number;
 }
 
-void processStep(Board &gameBoard, int N, int M, int L) {
+void processStep(Board &gameBoard, int N, int M, int T) {
     int i,j,k;
     int number;
     Board tempBoard;
     Cell neighbors[8];
-    for (i=0; i<8; i++) {
-        for (j=0; j<8; j++) {
-            if ((i!=0)&&(i!=7)&&(j!=0)&&(j!=7)) {
-                neighbors[0] = gameBoard.boardContents[8*(i-1)+j];
-                neighbors[1] = gameBoard.boardContents[8*(i-1)+(j+1)];
-                neighbors[2] = gameBoard.boardContents[8*i+(j+1)];
-                neighbors[3] = gameBoard.boardContents[8*(i+1)+(j+1)];
-                neighbors[4] = gameBoard.boardContents[8*(i+1)+j];
-                neighbors[5] = gameBoard.boardContents[8*(i+1)+(j-1)];
-                neighbors[6] = gameBoard.boardContents[8*i+(j-1)];
-                neighbors[7] = gameBoard.boardContents[8*(i-1)+(j-1)];
+    for (i=0; i<L; i++) {
+        for (j=0; j<W; j++) {
+            if ((i!=0)&&(i!=L-1)&&(j!=0)&&(j!=W-1)) {
+                neighbors[0] = gameBoard.boardContents[W*(i-1)+j];
+                neighbors[1] = gameBoard.boardContents[W*(i-1)+(j+1)];
+                neighbors[2] = gameBoard.boardContents[W*i+(j+1)];
+                neighbors[3] = gameBoard.boardContents[W*(i+1)+(j+1)];
+                neighbors[4] = gameBoard.boardContents[W*(i+1)+j];
+                neighbors[5] = gameBoard.boardContents[W*(i+1)+(j-1)];
+                neighbors[6] = gameBoard.boardContents[W*i+(j-1)];
+                neighbors[7] = gameBoard.boardContents[W*(i-1)+(j-1)];
             }
-            if ((i==0)&&(j!=0)&&(j!=7)) {
-                neighbors[0] = gameBoard.boardContents[8*7+j];
-                neighbors[1] = gameBoard.boardContents[8*7+(j+1)];
-                neighbors[2] = gameBoard.boardContents[8*0+(j+1)];
-                neighbors[3] = gameBoard.boardContents[8*1+(j+1)];
-                neighbors[4] = gameBoard.boardContents[8*1+j];
-                neighbors[5] = gameBoard.boardContents[8*1+(j-1)];
-                neighbors[6] = gameBoard.boardContents[8*0+(j-1)];
-                neighbors[7] = gameBoard.boardContents[8*7+(j-1)];
+            if ((i==0)&&(j!=0)&&(j!=W-1)) {
+                neighbors[0] = gameBoard.boardContents[W*(L-1)+j];
+                neighbors[1] = gameBoard.boardContents[W*(L-1)+(j+1)];
+                neighbors[2] = gameBoard.boardContents[W*0+(j+1)];
+                neighbors[3] = gameBoard.boardContents[W*1+(j+1)];
+                neighbors[4] = gameBoard.boardContents[W*1+j];
+                neighbors[5] = gameBoard.boardContents[W*1+(j-1)];
+                neighbors[6] = gameBoard.boardContents[W*0+(j-1)];
+                neighbors[7] = gameBoard.boardContents[W*(L-1)+(j-1)];
             }
-            if ((i==7)&&(j!=0)&&(j!=7)) {
-                neighbors[0] = gameBoard.boardContents[8*6+j];
-                neighbors[1] = gameBoard.boardContents[8*6+(j+1)];
-                neighbors[2] = gameBoard.boardContents[8*7+(j+1)];
-                neighbors[3] = gameBoard.boardContents[8*0+(j+1)];
-                neighbors[4] = gameBoard.boardContents[8*0+j];
-                neighbors[5] = gameBoard.boardContents[8*0+(j-1)];
-                neighbors[6] = gameBoard.boardContents[8*7+(j-1)];
-                neighbors[7] = gameBoard.boardContents[8*6+(j-1)];
+            if ((i==(L-1))&&(j!=0)&&(j!=W-1)) {
+                neighbors[0] = gameBoard.boardContents[W*(L-2)+j];
+                neighbors[1] = gameBoard.boardContents[W*(L-2)+(j+1)];
+                neighbors[2] = gameBoard.boardContents[W*(L-1)+(j+1)];
+                neighbors[3] = gameBoard.boardContents[W*0+(j+1)];
+                neighbors[4] = gameBoard.boardContents[W*0+j];
+                neighbors[5] = gameBoard.boardContents[W*0+(j-1)];
+                neighbors[6] = gameBoard.boardContents[W*(L-1)+(j-1)];
+                neighbors[7] = gameBoard.boardContents[W*(L-2)+(j-1)];
             }
-            if ((j==0)&&(i!=0)&&(i!=7)) {
-                neighbors[0] = gameBoard.boardContents[8*(i-1)+0];
-                neighbors[1] = gameBoard.boardContents[8*(i-1)+1];
-                neighbors[2] = gameBoard.boardContents[8*i+1];
-                neighbors[3] = gameBoard.boardContents[8*(i+1)+1];
-                neighbors[4] = gameBoard.boardContents[8*(i+1)+0];
-                neighbors[5] = gameBoard.boardContents[8*(i+1)+7];
-                neighbors[6] = gameBoard.boardContents[8*i+7];
-                neighbors[7] = gameBoard.boardContents[8*(i-1)+7];
+            if ((j==0)&&(i!=0)&&(i!=(L-1))) {
+                neighbors[0] = gameBoard.boardContents[W*(i-1)+0];
+                neighbors[1] = gameBoard.boardContents[W*(i-1)+1];
+                neighbors[2] = gameBoard.boardContents[W*i+1];
+                neighbors[3] = gameBoard.boardContents[W*(i+1)+1];
+                neighbors[4] = gameBoard.boardContents[W*(i+1)+0];
+                neighbors[5] = gameBoard.boardContents[W*(i+1)+W-1];
+                neighbors[6] = gameBoard.boardContents[W*i+W-1];
+                neighbors[7] = gameBoard.boardContents[W*(i-1)+W-1];
             }
-            if ((j==7)&&(i!=0)&&(i!=7)) {
-                neighbors[0] = gameBoard.boardContents[8*(i-1)+7];
-                neighbors[1] = gameBoard.boardContents[8*(i-1)+0];
-                neighbors[2] = gameBoard.boardContents[8*i+0];
-                neighbors[3] = gameBoard.boardContents[8*(i+1)+0];
-                neighbors[4] = gameBoard.boardContents[8*(i+1)+7];
-                neighbors[5] = gameBoard.boardContents[8*(i+1)+6];
-                neighbors[6] = gameBoard.boardContents[8*i+6];
-                neighbors[7] = gameBoard.boardContents[8*(i-1)+6];
+            if ((j==W-1)&&(i!=0)&&(i!=L-1)) {
+                neighbors[0] = gameBoard.boardContents[W*(i-1)+W-1];
+                neighbors[1] = gameBoard.boardContents[W*(i-1)+0];
+                neighbors[2] = gameBoard.boardContents[W*i+0];
+                neighbors[3] = gameBoard.boardContents[W*(i+1)+0];
+                neighbors[4] = gameBoard.boardContents[W*(i+1)+W-1];
+                neighbors[5] = gameBoard.boardContents[W*(i+1)+W-2];
+                neighbors[6] = gameBoard.boardContents[W*i+W-2];
+                neighbors[7] = gameBoard.boardContents[W*(i-1)+W-2];
             }
             if ((i==0)&&(j==0)) {
-                neighbors[0] = gameBoard.boardContents[8*7+0];
-                neighbors[1] = gameBoard.boardContents[8*7+1];
-                neighbors[2] = gameBoard.boardContents[8*0+1];
-                neighbors[3] = gameBoard.boardContents[8*1+1];
-                neighbors[4] = gameBoard.boardContents[8*1+0];
-                neighbors[5] = gameBoard.boardContents[8*1+7];
-                neighbors[6] = gameBoard.boardContents[8*0+7];
-                neighbors[7] = gameBoard.boardContents[8*7+7];
+                neighbors[0] = gameBoard.boardContents[W*(L-1)+0];
+                neighbors[1] = gameBoard.boardContents[W*(L-1)+1];
+                neighbors[2] = gameBoard.boardContents[W*0+1];
+                neighbors[3] = gameBoard.boardContents[W*1+1];
+                neighbors[4] = gameBoard.boardContents[W*1+0];
+                neighbors[5] = gameBoard.boardContents[W*1+(W-1)];
+                neighbors[6] = gameBoard.boardContents[W*0+(W-1)];
+                neighbors[7] = gameBoard.boardContents[W*(L-1)+(W-1)];
             }
-            if ((i==0)&&(j==7)) {
-                neighbors[0] = gameBoard.boardContents[8*7+7];
-                neighbors[1] = gameBoard.boardContents[8*7+0];
-                neighbors[2] = gameBoard.boardContents[8*0+0];
-                neighbors[3] = gameBoard.boardContents[8*1+0];
-                neighbors[4] = gameBoard.boardContents[8*1+7];
-                neighbors[5] = gameBoard.boardContents[8*1+6];
-                neighbors[6] = gameBoard.boardContents[8*0+6];
-                neighbors[7] = gameBoard.boardContents[8*7+6];
+            if ((i==0)&&(j==W-1)) {
+                neighbors[0] = gameBoard.boardContents[W*(L-1)+(W-1)];
+                neighbors[1] = gameBoard.boardContents[W*(L-1)+0];
+                neighbors[2] = gameBoard.boardContents[W*0+0];
+                neighbors[3] = gameBoard.boardContents[W*1+0];
+                neighbors[4] = gameBoard.boardContents[W*1+(W-1)];
+                neighbors[5] = gameBoard.boardContents[W*1+(W-2)];
+                neighbors[6] = gameBoard.boardContents[W*0+(W-2)];
+                neighbors[7] = gameBoard.boardContents[W*(L-1)+(W-2)];
             }
-            if ((i==7)&&(j==0)) {
-                neighbors[0] = gameBoard.boardContents[8*6+0];
-                neighbors[1] = gameBoard.boardContents[8*6+1];
-                neighbors[2] = gameBoard.boardContents[8*7+1];
-                neighbors[3] = gameBoard.boardContents[8*0+1];
-                neighbors[4] = gameBoard.boardContents[8*0+0];
-                neighbors[5] = gameBoard.boardContents[8*0+7];
-                neighbors[6] = gameBoard.boardContents[8*7+7];
-                neighbors[7] = gameBoard.boardContents[8*6+7];
+            if ((i==L-1)&&(j==0)) {
+                neighbors[0] = gameBoard.boardContents[W*(L-2)+0];
+                neighbors[1] = gameBoard.boardContents[W*(L-2)+1];
+                neighbors[2] = gameBoard.boardContents[W*(L-1)+1];
+                neighbors[3] = gameBoard.boardContents[W*0+1];
+                neighbors[4] = gameBoard.boardContents[W*0+0];
+                neighbors[5] = gameBoard.boardContents[W*0+(W-1)];
+                neighbors[6] = gameBoard.boardContents[W*(L-1)+(W-1)];
+                neighbors[7] = gameBoard.boardContents[W*(L-2)+(W-1)];
             }
-            if ((i==7)&&(j==7)) {
-                neighbors[0] = gameBoard.boardContents[8*6+7];
-                neighbors[1] = gameBoard.boardContents[8*6+0];
-                neighbors[2] = gameBoard.boardContents[8*7+0];
-                neighbors[3] = gameBoard.boardContents[8*0+0];
-                neighbors[4] = gameBoard.boardContents[8*0+7];
-                neighbors[5] = gameBoard.boardContents[8*0+6];
-                neighbors[6] = gameBoard.boardContents[8*7+6];
-                neighbors[7] = gameBoard.boardContents[8*6+6];
+            if ((i==L-1)&&(j==W-1)) {
+                neighbors[0] = gameBoard.boardContents[W*(L-2)+W-1];
+                neighbors[1] = gameBoard.boardContents[W*(L-2)+0];
+                neighbors[2] = gameBoard.boardContents[W*(L-1)+0];
+                neighbors[3] = gameBoard.boardContents[W*0+0];
+                neighbors[4] = gameBoard.boardContents[W*0+W-1];
+                neighbors[5] = gameBoard.boardContents[W*0+W-2];
+                neighbors[6] = gameBoard.boardContents[W*(L-1)+W-2];
+                neighbors[7] = gameBoard.boardContents[W*(L-2)+W-2];
             }
             
             number = searchNeighbors(neighbors);
-            if (!gameBoard.boardContents[8*i+j].alive) {
+            if (!gameBoard.boardContents[W*i+j].alive) {
                 if (number==N) {
-                    tempBoard.boardContents[8*i+j].alive = true;
+                    tempBoard.boardContents[W*i+j].alive = true;
                     tempBoard.existsLife = true;
                 }
                 else {
-                    tempBoard.boardContents[8*i+j].alive = false;
+                    tempBoard.boardContents[W*i+j].alive = false;
                 }
             }
             else {
-                if ((number>=M)&&(number<=L)) {
-                    tempBoard.boardContents[8*i+j].alive = true;
+                if ((number>=M)&&(number<=T)) {
+                    tempBoard.boardContents[W*i+j].alive = true;
                     tempBoard.existsLife = true;
                 }
                 else {
-                    tempBoard.boardContents[8*i+j].alive = false;
+                    tempBoard.boardContents[W*i+j].alive = false;
                 }
             }
         }
     }
-    for (i=0; i<8; i++) {
-        for (j=0; j<8; j++) {
-            gameBoard.boardContents[8*i+j].alive = tempBoard.boardContents[8*i+j].alive;
+    for (i=0; i<L; i++) {
+        for (j=0; j<W; j++) {
+            gameBoard.boardContents[W*i+j].alive = tempBoard.boardContents[W*i+j].alive;
         }
     }
     gameBoard.existsLife = tempBoard.existsLife;
@@ -258,14 +262,14 @@ void processStep(Board &gameBoard, int N, int M, int L) {
 int main(){
     int i;
     int j;
-    int N,M,L;
+    int N,M,T;
     char flag;
     Board gameBoard;
     initializeEmptyBoard(gameBoard);
     greeting();
     N = getDeadToAliveThreshold();
     M = getAliveToDeadMinimum();
-    L = getAliveToDeadMaximum();
+    T = getAliveToDeadMaximum();
     introBoard();
     getBoard(gameBoard);
     finalIntro();
@@ -273,9 +277,13 @@ int main(){
     while (true) {
         scanf("%c", &flag);
         if (flag == 'n') {
-            processStep(gameBoard,N,M,L);
+            processStep(gameBoard,N,M,T);
         }
         if (flag == 'q') {
+            break;
+        }
+        if (!gameBoard.existsLife) {
+            printf("It seems that all cells are dead now. You lost!\n");
             break;
         }
     }
